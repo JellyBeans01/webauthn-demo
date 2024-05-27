@@ -105,7 +105,7 @@ Using those three components, the authentication process can be explained as fol
 5. Authenticator generates a cryptographic signature (public - private keypair) which is sent back to the webserver
 6. The webserver verifies the signature to the unique challenge and logs the user in when verified
 
-![image](https://gist.github.com/assets/42315197/4f38a8ce-13c3-467d-94c6-0e026eef1709)
+<img src="https://gist.github.com/assets/42315197/4f38a8ce-13c3-467d-94c6-0e026eef1709" alt="authentication process" />
 
 More information about the technical specs can be found [here](https://www.w3.org/TR/webauthn/) 
 
@@ -127,6 +127,6 @@ We are more and more moving away from the conventional ways of implementing auth
 
 Accounts will be more secure and the risk of account takeovers and limited user experience will be problems of the past.
 
-![image](https://gist.github.com/assets/42315197/2fde34f4-59e4-49d9-b674-8512658ffb08)
+<img src="https://gist.github.com/assets/42315197/2fde34f4-59e4-49d9-b674-8512658ffb08" alt="authentication timeline" />
 
 ### Browser support?
