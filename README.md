@@ -105,7 +105,7 @@ Using those three components, the authentication process can be explained as fol
 5. Authenticator generates a cryptographic signature (public - private keypair) which is sent back to the webserver
 6. The webserver verifies the signature to the unique challenge and logs the user in when verified
 
-<img src="https://gist.github.com/assets/42315197/4f38a8ce-13c3-467d-94c6-0e026eef1709" alt="authentication process" />
+![authentication process](https://gist.github.com/assets/42315197/4f38a8ce-13c3-467d-94c6-0e026eef1709)
 
 More information about the technical specs can be found [here](https://www.w3.org/TR/webauthn/) 
 
@@ -120,13 +120,19 @@ Here are some ways to do that:
 - register multiple devices
 - use a password manager like 1password to store your private key in (this can also be used with multiple devices)
 
+### Browser support?
+
+WebAuthn is [supported in all major browsers](https://caniuse.com/?search=webauthn), except for 
+- Firefox: partial support because TouchID is not yet being supported.
+
+Some smaller browsers
+- Firefox for android: not supported when a PIN is set
+- Opera mini: no support at all
+- IE: no support at all, but it's IE after all 🙈
+
 ### What does the future bring?
 
-Authentication is shifting towards passwordless.
-We are more and more moving away from the conventional ways of implementing authentication.
-
+Authentication is shifting more and more towards passwordless.
 Accounts will be more secure and the risk of account takeovers and limited user experience will be problems of the past.
 
-<img src="https://gist.github.com/assets/42315197/2fde34f4-59e4-49d9-b674-8512658ffb08" alt="authentication timeline" />
-
-### Browser support?
+![authentication timeline](https://gist.github.com/assets/42315197/2fde34f4-59e4-49d9-b674-8512658ffb08)
