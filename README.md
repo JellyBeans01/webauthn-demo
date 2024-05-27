@@ -111,8 +111,8 @@ More information about the technical specs can be found [here](https://www.w3.or
 
 ### Drawbacks
 
-I can already hear you think: "WebAuthn, okay, all nice.
-But what if I lose my device on which my private key is stored?"
+I can already hear you think: 
+"WebAuthn, okay, all nice. But what if I lose my device on which my private key is stored?"
 The answer is simple: you will be locked out of your account, with no way to recover it.
 
 That is why it is important to have a way to recover it.
