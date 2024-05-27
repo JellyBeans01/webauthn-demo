@@ -1,5 +1,5 @@
 {
-    "name": "repetitieruimtes-parfou",
+    "name": "webauthn-demo",
     "version": "0.1.0",
     "private": true,
     "type": "module",
@@ -13,7 +13,7 @@
         "db:studio": "dotenv drizzle-kit studio",
         "migration:create": "dotenv drizzle-kit generate",
         "migration:drop": "drizzle-kit drop",
-        "dev": "pnpm db:start && pnpm db:seed && next dev",
+        "dev": "pnpm db:start && pnpm db:seed && next dev --experimental-https",
         "lint": "next lint",
         "tsc": "tsc --noEmit",
         "tsc:watch": "tsc --noEmit --watch",
