@@ -1,6 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
-// import Passkey from "next-auth/providers/passkey";
+import Passkey from "next-auth/providers/passkey";
+import "server-only";
 import { db } from "~/server/db";
 
 /**
@@ -35,7 +36,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }),
     },
     adapter: PrismaAdapter(db),
-    providers: [],
-    // providers: [Passkey],
-    // experimental: { enableWebAuthn: true },
+    providers: [Passkey],
+    experimental: { enableWebAuthn: true },
 });

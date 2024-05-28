@@ -1,5 +1,5 @@
 import { type PropsWithChildren } from "react";
-import Button from "~/components/button";
+import Button from "~/components/buttons/button";
 
 export default async function Layout({ children }: PropsWithChildren) {
     return (

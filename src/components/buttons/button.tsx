@@ -16,9 +16,9 @@ const buttonVariants = cva("px-5 py-2.5 rounded transition-colors", {
     },
 });
 
-export type Props = PropsWithChildren<
-    WithRequired<ButtonHTMLAttributes<HTMLButtonElement>, "type"> & VariantProps<typeof buttonVariants>
->;
+export type ButtonProps = WithRequired<ButtonHTMLAttributes<HTMLButtonElement>, "type"> &
+    VariantProps<typeof buttonVariants>;
+export type Props = PropsWithChildren<ButtonProps>;
 
 function Button({ children, className, variant, ...props }: Props) {
     return (

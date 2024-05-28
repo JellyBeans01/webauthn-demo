@@ -156,3 +156,6 @@ This is a huge restriction for me personally
 - Only works with `next-auth v5-beta.8` or above!
 - The documentation itself says that this module is not yet production ready!
 - You have to set an experimental flag in your next-auth configuration `experimental: { enableWebAuthn: true },`
+- the webauthn packages need to be of a specific version to not throw peer dependency warnings
+  - @simplewebauthn/server@9.0.3 
+  - @simplewebauthn/browser@9.0.1

@@ -1,5 +1,6 @@
 import { GeistSans } from "geist/font/sans";
 import { type PropsWithChildren } from "react";
+import { Toaster } from "~/components/ui/sonner";
 import TRPCReactProvider from "~/providers/trpc-react-provider";
 import "~/styles/globals.css";
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#191714] to-[#2234AE] text-white">
                         {children}
                     </main>
+                    <Toaster />
                 </TRPCReactProvider>
             </body>
         </html>
