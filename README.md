@@ -143,3 +143,15 @@ Accounts will be more secure and the risk of account takeovers and limited user 
 - https://dev.to/dagnelies/webauthn-what-if-i-loose-my-device-1lbh
 - https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API
 - https://developer.mozilla.org/en-US/docs/Web/API/Credential_Management_API
+
+## Technical notes:
+
+### Next-auth package
+
+The popular authentication package 'next-auth' has a provider for the WebAuthn module.
+However, there are many limitations:
+
+- I started this project with drizzle as database adapter, but the package only works with `prisma v1.3.0 and later`.
+This is a huge restriction for me personally
+- Only works with `next-auth v5-beta.8` or above!
+- The documentation itself says that this module is not yet production ready!
