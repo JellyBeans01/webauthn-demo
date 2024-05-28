@@ -13,7 +13,11 @@ export default function RootLayout({ children }: PropsWithChildren) {
     return (
         <html lang="nl" className={`${GeistSans.variable}`}>
             <body>
-                <TRPCReactProvider>{children}</TRPCReactProvider>
+                <TRPCReactProvider>
+                    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#191714] to-[#2234AE] text-white">
+                        {children}
+                    </main>
+                </TRPCReactProvider>
             </body>
         </html>
     );
