@@ -1,5 +1,6 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
+// import Passkey from "next-auth/providers/passkey";
 import { db } from "~/server/db";
 
 /**
@@ -33,6 +34,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             },
         }),
     },
-    adapter: DrizzleAdapter(db),
+    adapter: PrismaAdapter(db),
     providers: [],
+    // providers: [Passkey],
+    // experimental: { enableWebAuthn: true },
 });

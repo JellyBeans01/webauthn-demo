@@ -46,14 +46,15 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String          @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?         @unique
   emailVerified DateTime?
   image         String?
   password      String?
   accounts      Account[]
   sessions      Session[]
+  Authenticator Authenticator[]
 }
 
 model VerificationToken {
@@ -62,4 +63,20 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// WebAuthn module
+model Authenticator {
+  credentialID         String  @db.Text
+  userId               String  @db.Text
+  providerAccountId    String  @db.Text
+  credentialPublicKey  String  @db.Text
+  counter              Int
+  credentialDeviceType String  @db.Text
+  credentialBackedUp   Boolean
+  transports           String? @db.Text
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([userId, credentialID])
+  @@unique([credentialID])
 }

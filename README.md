@@ -155,3 +155,4 @@ However, there are many limitations:
 This is a huge restriction for me personally
 - Only works with `next-auth v5-beta.8` or above!
 - The documentation itself says that this module is not yet production ready!
+- You have to set an experimental flag in your next-auth configuration `experimental: { enableWebAuthn: true },`
