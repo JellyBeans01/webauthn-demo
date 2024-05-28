@@ -66,6 +66,7 @@ model VerificationToken {
 }
 
 // WebAuthn module
+// Based on `type Passkey` https://simplewebauthn.dev/docs/packages/server#additional-data-structures
 model Authenticator {
   credentialID         String  @db.Text
   userId               String  @db.Text

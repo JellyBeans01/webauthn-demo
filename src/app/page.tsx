@@ -8,7 +8,9 @@ export default async function Home() {
 
     return (
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-            <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">My super awesome website</h1>
+            <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem] text-center">
+                My super awesome website
+            </h1>
             {!!session && (
                 <Link
                     className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
