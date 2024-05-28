@@ -38,4 +38,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(db),
     providers: [Passkey],
     experimental: { enableWebAuthn: true },
+    logger: {
+        warn: () => undefined, // Removes annoying logs
+    },
 });
