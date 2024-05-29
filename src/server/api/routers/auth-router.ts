@@ -4,7 +4,6 @@ import { type AuthenticationResponseJSON, type RegistrationResponseJSON } from "
 import { type User } from "next-auth";
 import { cookies } from "next/headers";
 import z from "zod";
-import { auth } from "~/auth";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { createSession, registerNewUserAndSignIn } from "~/server/db/queries/auth";
 import { getAuthenticatorByCredentialId } from "~/server/db/queries/authenticator";
