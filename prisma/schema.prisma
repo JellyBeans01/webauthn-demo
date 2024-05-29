@@ -54,7 +54,7 @@ model User {
   password      String?
   accounts      Account[]
   sessions      Session[]
-  Authenticator Authenticator[]
+  authenticator Authenticator[]
 }
 
 model VerificationToken {

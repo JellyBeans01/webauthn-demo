@@ -2,6 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
 import Passkey from "next-auth/providers/passkey";
 import "server-only";
+import { env } from "~/env";
 import { db } from "~/server/db";
 
 /**
@@ -38,6 +39,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(db),
     providers: [Passkey],
     experimental: { enableWebAuthn: true },
+    cookies: {
+        sessionToken: {
+            name: env.NEXTAUTH_SESSION_TOKEN_COOKIE,
+        },
+    },
     logger: {
         warn: () => undefined, // Removes annoying logs
     },

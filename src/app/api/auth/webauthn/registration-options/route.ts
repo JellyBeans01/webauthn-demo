@@ -4,7 +4,7 @@ import { CHALLENGE_COOKIE } from "~/server/resources/constants";
 import { api } from "~/trpc/server";
 
 export async function GET() {
-    const response = await api.auth.generateRegistrationOptions();
+    const response = await api.register.generateRegistrationOptions();
 
     // Save the challenge in a cookie,
     // since we need this to verify the registration when the user adds an authenticator

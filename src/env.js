@@ -12,7 +12,8 @@ export const env = createEnv({
             .enum(["development", "test", "production"])
 
             .default("development"),
-        NEXTAUTH_SECRET: process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
+        NEXTAUTH_SESSION_TOKEN_COOKIE: z.string(),
+        NEXTAUTH_SECRET: z.string(),
         NEXTAUTH_URL: z.preprocess(
             // This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
             // Since NextAuth.js automatically uses the VERCEL_URL if present.
@@ -20,6 +21,7 @@ export const env = createEnv({
             // VERCEL_URL doesn't include `https` so it cant be validated as a URL
             process.env.VERCEL ? z.string() : z.string().url(),
         ),
+        SESSION_TOKEN_SALT: z.string(),
         WEBAUTHN_RP_ID: z.string(),
     },
 
@@ -39,8 +41,10 @@ export const env = createEnv({
     runtimeEnv: {
         DATABASE_URL: process.env.DATABASE_URL,
         NODE_ENV: process.env.NODE_ENV,
+        NEXTAUTH_SESSION_TOKEN_COOKIE: process.env.NEXTAUTH_SESSION_TOKEN_COOKIE,
         NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
         NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+        SESSION_TOKEN_SALT: process.env.SESSION_TOKEN_SALT,
         WEBAUTHN_RP_ID: process.env.WEBAUTHN_RP_ID,
     },
     /**

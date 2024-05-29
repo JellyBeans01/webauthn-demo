@@ -1,15 +1,18 @@
-import { generateRegistrationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
+import type { Authenticator } from "@prisma/client";
+import { generateRegistrationOptions, verifyRegistrationResponse } from "@simplewebauthn/server";
 import { isoUint8Array, isoBase64URL } from "@simplewebauthn/server/helpers";
 import {
-    type AuthenticationResponseJSON,
     type AuthenticatorTransportFuture,
     type PublicKeyCredentialDescriptorFuture,
+    type RegistrationResponseJSON,
 } from "@simplewebauthn/types";
+import { type User } from "next-auth";
 import { cookies } from "next/headers";
 import z from "zod";
 import { rpID, rpName, origin } from "~/config/webauthn";
 import { env } from "~/env";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { registerNewUserAndSignIn } from "~/server/db/queries/auth";
 import { getPasskeysByUserId } from "~/server/db/queries/authenticator";
 import { getUserById } from "~/server/db/queries/user";
 import { CHALLENGE_COOKIE } from "~/server/resources/constants";
@@ -25,7 +28,7 @@ export const verificationScheme = z.object({
     clientExtensionResults: z.any(),
 });
 
-export const authRouter = createTRPCRouter({
+export const registerRouter = createTRPCRouter({
     generateRegistrationOptions: publicProcedure.query(async ({ ctx }) => {
         try {
             const { session } = ctx;
@@ -49,13 +52,10 @@ export const authRouter = createTRPCRouter({
                     transports: (passkey.transports?.split(",") ?? []) as AuthenticatorTransportFuture[],
                 })),
                 authenticatorSelection: {
-                    authenticatorAttachment: "platform",
-                    requireResidentKey: true,
+                    authenticatorAttachment: "cross-platform",
                 },
                 supportedAlgorithmIDs: [-7, -257],
             });
-
-            // TODO: Remember these options for the user
 
             return apiSuccess(options);
         } catch (err) {
@@ -69,12 +69,10 @@ export const authRouter = createTRPCRouter({
             const challenge = cookies().get(CHALLENGE_COOKIE)?.value ?? null;
             if (!challenge) return apiError("Could not verify the registration!");
 
-            const registration = input as AuthenticationResponseJSON;
-
-            console.log(registration);
+            const registration = input as RegistrationResponseJSON;
 
             // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/server/src/authentication/verifyAuthenticationResponse.ts
-            const { verified, authenticationInfo } = await verifyAuthenticationResponse({
+            const { verified, registrationInfo } = await verifyRegistrationResponse({
                 response: registration,
                 expectedChallenge: challenge, // Challenge we stored in the cookies
                 expectedOrigin: `${origin}${env.NODE_ENV === "development" ? ":3000" : ""}`,
@@ -84,12 +82,28 @@ export const authRouter = createTRPCRouter({
 
             if (!verified) return apiError("Registration verification has failed!");
 
-            // TODO:
-            //  1. create a new user
-            //  2. store authenticator
-            //  3. create session
+            if (!registrationInfo?.credentialPublicKey || !registration.response.transports) {
+                return apiError("Verification was successful, but some data was missing!");
+            }
 
-            return apiSuccess({ verified: true });
+            const user: User = {
+                name: "Anonymous",
+                // Other user data
+            };
+
+            const authenticator: Omit<Authenticator, "userId"> = {
+                credentialID: registrationInfo?.credentialID ?? registration.id,
+                credentialPublicKey: isoUint8Array.toHex(registrationInfo.credentialPublicKey),
+                counter: registrationInfo.counter,
+                transports: registration.response.transports.join(","),
+                credentialBackedUp: registrationInfo.credentialBackedUp,
+                credentialDeviceType: registrationInfo.credentialDeviceType,
+                providerAccountId: "webauthn",
+            };
+
+            const sessionToken = await registerNewUserAndSignIn(user, authenticator);
+
+            return apiSuccess({ verified: true, sessionToken });
         } catch (err) {
             console.log("[ERROR] Failed verifying the registration\n", err);
             return apiError("Could not verify the registration");

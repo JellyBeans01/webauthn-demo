@@ -1,6 +1,6 @@
 "use client";
 
-import { startRegistration } from "@simplewebauthn/browser";
+import { startAuthentication, startRegistration } from "@simplewebauthn/browser";
 import { type PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
 import { useRouter } from "next/navigation";
 import { memo, type PropsWithChildren, useCallback, useState } from "react";
@@ -34,6 +34,18 @@ function ManualLoginButton({ children, ...props }: Props) {
         }
     }, []);
 
+    const handleAuthentication = useCallback(async (options: PublicKeyCredentialCreationOptionsJSON) => {
+        try {
+            // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/browser/src/methods/startAuthentication.ts
+            return startAuthentication(options);
+        } catch (err) {
+            console.log(err);
+            toast.error("Something went wrong, try again later...");
+
+            return null;
+        }
+    }, []);
+
     const login = useCallback(async () => {
         try {
             setIsLoading(true);
@@ -45,11 +57,12 @@ function ManualLoginButton({ children, ...props }: Props) {
                 return;
             }
 
+            // const authentication = await handleAuthentication(registrationOptionsResponse.data);
+            // if (!authentication) return; // Already handled by the handleAuthentication function
+
             // Pass the options to the authenticator and wait for a response
             const registration = await handleRegistration(registrationOptionsResponse.data);
             if (!registration) return; // Already handled by the handleRegistration function
-
-            console.log(registration);
 
             // Verify registration
             const verifyResponse = await verifyRegistration(registration);
