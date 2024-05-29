@@ -6,28 +6,28 @@ import { toast } from "sonner";
 import { type ButtonProps } from "~/components/buttons/button";
 import LoadingButton from "~/components/buttons/loading-button";
 
-export type Props = PropsWithChildren<Omit<ButtonProps, "onClick">>;
+export type Props = PropsWithChildren<Omit<ButtonProps, "type" | "onClick"> & { isLogin?: boolean }>;
 
-function NextAuthLoginButton({ children, ...props }: Props) {
+function NextAuthButton({ children, isLogin = false, ...props }: Props) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const login = useCallback(async () => {
         try {
             setIsLoading(true);
-            await signIn("passkey");
+            await signIn("passkey", !isLogin ? { action: "register" } : undefined);
         } catch (err) {
             console.log(err);
             toast.error("something went wrong when trying to login");
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [isLogin]);
 
     return (
-        <LoadingButton {...props} isLoading={isLoading} onClick={login}>
+        <LoadingButton {...props} type="button" isLoading={isLoading} onClick={login}>
             {children}
         </LoadingButton>
     );
 }
 
-export default memo(NextAuthLoginButton);
+export default memo(NextAuthButton);

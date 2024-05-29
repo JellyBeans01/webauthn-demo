@@ -7,17 +7,18 @@ import { memo, type PropsWithChildren, useCallback, useState } from "react";
 import { toast } from "sonner";
 import { type ButtonProps } from "~/components/buttons/button";
 import LoadingButton from "~/components/buttons/loading-button";
-import { getRegistrationOptions, verifyRegistration } from "~/resources/requests";
+import { getOptions, verify } from "~/resources/requests";
 
-export type Props = PropsWithChildren<Omit<ButtonProps, "onClick">>;
+export type Props = PropsWithChildren<Omit<ButtonProps, "type" | "onClick"> & { isLogin?: boolean }>;
 
-function ManualLoginButton({ children, ...props }: Props) {
+function ManualButton({ children, isLogin = false, ...props }: Props) {
     const router = useRouter();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleRegistration = useCallback(async (options: PublicKeyCredentialCreationOptionsJSON) => {
         try {
+            console.log(options);
             // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/browser/src/methods/startAuthentication.ts
             return startRegistration(options);
         } catch (err) {
@@ -51,9 +52,9 @@ function ManualLoginButton({ children, ...props }: Props) {
             setIsLoading(true);
 
             // Get the registration options
-            const registrationOptionsResponse = await getRegistrationOptions();
-            if (!registrationOptionsResponse.success) {
-                toast.error(registrationOptionsResponse.message);
+            const optionsResponse = await getOptions(isLogin);
+            if (!optionsResponse.success) {
+                toast.error(optionsResponse.message);
                 return;
             }
 
@@ -61,11 +62,11 @@ function ManualLoginButton({ children, ...props }: Props) {
             // if (!authentication) return; // Already handled by the handleAuthentication function
 
             // Pass the options to the authenticator and wait for a response
-            const registration = await handleRegistration(registrationOptionsResponse.data);
+            const registration = await handleRegistration(optionsResponse.data);
             if (!registration) return; // Already handled by the handleRegistration function
 
             // Verify registration
-            const verifyResponse = await verifyRegistration(registration);
+            const verifyResponse = await verify(registration);
             if (!verifyResponse.success) {
                 toast.error(verifyResponse.message);
                 return;
@@ -78,13 +79,13 @@ function ManualLoginButton({ children, ...props }: Props) {
         } finally {
             setIsLoading(false);
         }
-    }, [handleRegistration, router]);
+    }, [handleRegistration, isLogin, router]);
 
     return (
-        <LoadingButton {...props} isLoading={isLoading} onClick={login}>
+        <LoadingButton {...props} type="button" isLoading={isLoading} onClick={login}>
             {children}
         </LoadingButton>
     );
 }
 
-export default memo(ManualLoginButton);
+export default memo(ManualButton);

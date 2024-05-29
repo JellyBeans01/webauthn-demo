@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { auth } from "~/auth";
-import ManualLoginButton from "~/components/buttons/manual-login-button";
-import NextAuthLoginButton from "~/components/buttons/next-auth-login-button";
+import ManualButton from "~/components/buttons/custom-routes/manual-button";
+import NextAuthButton from "~/components/buttons/next-auth/next-auth-button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 export default async function Home() {
     const session = await auth();
@@ -19,10 +20,20 @@ export default async function Home() {
                     <div className="text-lg">Navigate to a very secure page :)</div>
                 </Link>
             )}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-                <NextAuthLoginButton type="button">Sign in using Next-auth</NextAuthLoginButton>
-                <ManualLoginButton type="button">Sign in using custom routes</ManualLoginButton>
-            </div>
+            <Tabs defaultValue="custom-routes">
+                <TabsList className="w-full">
+                    <TabsTrigger value="custom-routes">Custom routes</TabsTrigger>
+                    <TabsTrigger value="next-auth">Next-Auth</TabsTrigger>
+                </TabsList>
+                <TabsContent value="custom-routes" className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:gap-8">
+                    <ManualButton>Register using custom routes</ManualButton>
+                    <ManualButton isLogin>Sign in using custom routes</ManualButton>
+                </TabsContent>
+                <TabsContent value="next-auth" className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:gap-8">
+                    <NextAuthButton>Register using next-auth</NextAuthButton>
+                    <NextAuthButton isLogin>Sign in using Next-auth</NextAuthButton>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }

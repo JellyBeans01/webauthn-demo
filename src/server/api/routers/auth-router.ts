@@ -13,11 +13,10 @@ import { rpID, rpName, origin } from "~/config/webauthn";
 import { env } from "~/env";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { registerNewUserAndSignIn } from "~/server/db/queries/auth";
-import { getPasskeysByUserId } from "~/server/db/queries/authenticator";
 import { getUserById } from "~/server/db/queries/user";
 import { CHALLENGE_COOKIE } from "~/server/resources/constants";
 import { apiError, apiSuccess } from "~/server/resources/responses";
-import { generateRandomString } from "~/utils/text";
+import { getAuthenticationOptions, getRegistrationOptions } from "~/server/utils/webauthn-options";
 
 export const verificationScheme = z.object({
     id: z.string(),
@@ -28,34 +27,17 @@ export const verificationScheme = z.object({
     clientExtensionResults: z.any(),
 });
 
-export const registerRouter = createTRPCRouter({
-    generateRegistrationOptions: publicProcedure.query(async ({ ctx }) => {
+export const authRouter = createTRPCRouter({
+    generateOptions: publicProcedure.input(z.object({ isLogin: z.boolean() })).query(async ({ ctx, input }) => {
         try {
+            const { isLogin } = input;
             const { session } = ctx;
 
             const user = session ? await getUserById(session.user.id) : null;
-            const passKeys = user ? await getPasskeysByUserId(user.id) : [];
 
-            // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/server/src/registration/generateRegistrationOptions.ts
-            const options = await generateRegistrationOptions({
-                rpName,
-                rpID,
-                userID: isoUint8Array.fromUTF8String(user?.id ?? generateRandomString()),
-                userName: user?.name ?? "Anonymous",
-                // Don't prompt users for additional information about the authenticator
-                // (Recommended for smoother UX)
-                attestationType: "none",
-                // Prevent users from re-registering existing authenticators
-                excludeCredentials: passKeys.map<PublicKeyCredentialDescriptorFuture>((passkey) => ({
-                    id: isoBase64URL.toBuffer(passkey.credentialID),
-                    type: "public-key",
-                    transports: (passkey.transports?.split(",") ?? []) as AuthenticatorTransportFuture[],
-                })),
-                authenticatorSelection: {
-                    authenticatorAttachment: "cross-platform",
-                },
-                supportedAlgorithmIDs: [-7, -257],
-            });
+            const getOptions = isLogin ? getAuthenticationOptions : getRegistrationOptions;
+
+            const options = await getOptions(user);
 
             return apiSuccess(options);
         } catch (err) {
@@ -64,7 +46,7 @@ export const registerRouter = createTRPCRouter({
         }
     }),
 
-    verifyRegistration: publicProcedure.input(verificationScheme).mutation(async ({ input }) => {
+    verify: publicProcedure.input(verificationScheme).mutation(async ({ input }) => {
         try {
             const challenge = cookies().get(CHALLENGE_COOKIE)?.value ?? null;
             if (!challenge) return apiError("Could not verify the registration!");
@@ -98,7 +80,7 @@ export const registerRouter = createTRPCRouter({
                 transports: registration.response.transports.join(","),
                 credentialBackedUp: registrationInfo.credentialBackedUp,
                 credentialDeviceType: registrationInfo.credentialDeviceType,
-                providerAccountId: "webauthn",
+                providerAccountId: "WebAuthn",
             };
 
             const sessionToken = await registerNewUserAndSignIn(user, authenticator);

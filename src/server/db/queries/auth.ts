@@ -30,6 +30,13 @@ export const registerNewUserAndSignIn = async (user: User, authenticator: Omit<A
                     sessionToken: token,
                 },
             },
+            accounts: {
+                create: {
+                    type: "",
+                    provider: "webauthn",
+                    providerAccountId: "webauthn",
+                },
+            },
         },
     });
 

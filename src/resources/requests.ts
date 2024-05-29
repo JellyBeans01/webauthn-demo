@@ -1,5 +1,6 @@
 import { type PublicKeyCredentialCreationOptionsJSON, type RegistrationResponseJSON } from "@simplewebauthn/types";
-import { WEBAUTHN_REGISTRATION_OPTIONS, WEBAUTHN_VERIFY } from "~/resources/endpoints";
+import { IS_LOGIN_QUERY_PARAM } from "~/resources/constants";
+import { WEBAUTHN_REGISTRATION_OPTIONS, WEBAUTHN_REGISTRATION_VERIFY } from "~/resources/endpoints";
 import { type Response as CustomResponse } from "~/types";
 
 const handleResponse = async <TData>(response: Response): Promise<CustomResponse<TData>> => {
@@ -7,13 +8,16 @@ const handleResponse = async <TData>(response: Response): Promise<CustomResponse
     return (await response.json()) as CustomResponse<TData>;
 };
 
-export const getRegistrationOptions = async () => {
-    const response = await fetch(WEBAUTHN_REGISTRATION_OPTIONS);
+export const getOptions = async (isLogin: boolean) => {
+    const url = new URL(WEBAUTHN_REGISTRATION_OPTIONS, window.location.origin);
+    url.searchParams.set(IS_LOGIN_QUERY_PARAM, `${isLogin}`);
+
+    const response = await fetch(url.toString());
     return handleResponse<PublicKeyCredentialCreationOptionsJSON>(response);
 };
 
-export const verifyRegistration = async (body: RegistrationResponseJSON) => {
-    const response = await fetch(WEBAUTHN_VERIFY, {
+export const verify = async (body: RegistrationResponseJSON) => {
+    const response = await fetch(WEBAUTHN_REGISTRATION_VERIFY, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
