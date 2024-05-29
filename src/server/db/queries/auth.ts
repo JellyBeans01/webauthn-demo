@@ -9,21 +9,39 @@ const generateSessionToken = async (user: User) => {
     const maxAge = 30 * 86400; // 30 days
     const expires = new Date(Date.now() + maxAge * 1_000);
 
-    const token = await encode({ maxAge, token: user, secret: env.NEXTAUTH_SECRET, salt: env.SESSION_TOKEN_SALT });
+    const sessionToken = await encode({
+        maxAge,
+        token: user,
+        secret: env.NEXTAUTH_SECRET,
+        salt: env.SESSION_TOKEN_SALT,
+    });
 
-    return { token, expires };
+    return { sessionToken, expires };
 };
 
 export const createSession = async (user: WithRequired<User, "id">) => {
-    const { expires, token } = await generateSessionToken(user);
+    const { expires, sessionToken } = await generateSessionToken(user);
 
     return db.session.create({
         data: {
             expires,
-            sessionToken: token,
+            sessionToken,
             user: {
                 connect: {
                     id: user.id,
+                },
+            },
+        },
+    });
+};
+
+export const createAuthenticator = async (userId: string, authenticator: Omit<Authenticator, "userId">) => {
+    return db.authenticator.create({
+        data: {
+            ...authenticator,
+            user: {
+                connect: {
+                    id: userId,
                 },
             },
         },
@@ -36,9 +54,7 @@ export const registerNewUserAndSignIn = async (user: User, authenticator: Omit<A
             name: user.name,
             email: user.email,
             image: user.image,
-            authenticator: {
-                create: authenticator,
-            },
+            // Creates the user account
             accounts: {
                 create: {
                     type: "",
@@ -49,7 +65,9 @@ export const registerNewUserAndSignIn = async (user: User, authenticator: Omit<A
         },
     });
 
-    const session = await createSession(newUser);
+    const { password: _password, ...sessionUser } = newUser;
+
+    const [session] = await Promise.all([createSession(sessionUser), createAuthenticator(newUser.id, authenticator)]);
 
     return session.sessionToken;
 };

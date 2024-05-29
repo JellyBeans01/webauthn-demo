@@ -3,13 +3,13 @@ import { isoBase64URL, isoUint8Array } from "@simplewebauthn/server/helpers";
 import type { AuthenticatorTransportFuture, PublicKeyCredentialDescriptorFuture } from "@simplewebauthn/types";
 import { type User } from "next-auth";
 import { rpID, rpName } from "~/config/webauthn";
-import { getPasskeysByUserId } from "~/server/db/queries/authenticator";
+import { getAuthenticatorsByUserId } from "~/server/db/queries/authenticator";
 import "~/types";
 import { type Nullable, type WithRequired } from "~/types";
 import { generateRandomString } from "~/utils/text";
 
 export const getRegistrationOptions = async (user: Nullable<WithRequired<User, "id">>) => {
-    const passKeys = user ? await getPasskeysByUserId(user.id) : [];
+    const passKeys = user ? await getAuthenticatorsByUserId(user.id) : [];
 
     // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/server/src/registration/generateRegistrationOptions.ts
     return generateRegistrationOptions({

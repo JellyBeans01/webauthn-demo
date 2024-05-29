@@ -1,16 +1,18 @@
 import type { Authenticator } from "@prisma/client";
 import { isoUint8Array } from "@simplewebauthn/server/helpers";
-import { type RegistrationResponseJSON } from "@simplewebauthn/types";
+import { type AuthenticationResponseJSON, type RegistrationResponseJSON } from "@simplewebauthn/types";
 import { type User } from "next-auth";
 import { cookies } from "next/headers";
 import z from "zod";
+import { auth } from "~/auth";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { registerNewUserAndSignIn } from "~/server/db/queries/auth";
+import { createSession, registerNewUserAndSignIn } from "~/server/db/queries/auth";
+import { getAuthenticatorByCredentialId } from "~/server/db/queries/authenticator";
 import { getUserById } from "~/server/db/queries/user";
 import { CHALLENGE_COOKIE } from "~/server/resources/constants";
 import { apiError, apiSuccess } from "~/server/resources/responses";
 import { getAuthenticationOptions, getRegistrationOptions } from "~/server/utils/webauthn-options";
-import { verifyRegistration } from "~/server/utils/webauthn-verify";
+import { verifyAuthentication, verifyRegistration } from "~/server/utils/webauthn-verify";
 
 export const verificationScheme = z.object({
     id: z.string(),
@@ -79,9 +81,29 @@ export const authRouter = createTRPCRouter({
         }
     }),
 
-    verifyAuthentication: publicProcedure.input(verificationScheme).mutation(() => {
+    verifyAuthentication: publicProcedure.input(verificationScheme).mutation(async ({ input }) => {
         try {
-            return apiSuccess({ verified: true, sessionToken: "" });
+            const challenge = cookies().get(CHALLENGE_COOKIE)?.value ?? null;
+            if (!challenge) return apiError("Could not verify the registration!");
+
+            const authentication = input as AuthenticationResponseJSON;
+
+            const authenticator = await getAuthenticatorByCredentialId(authentication.id);
+            if (!authenticator) return apiError("Invalid authenticator!");
+
+            // TODO: Do we need to do smth with authenticationInfo data?
+            const { verified, authenticationInfo: _authenticationInfo } = await verifyAuthentication(
+                authentication,
+                authenticator,
+                challenge,
+            );
+
+            if (!verified) return apiError("Authentication verification has failed!");
+
+            const { password: _password, ...sessionUser } = authenticator.user;
+            const session = await createSession(sessionUser);
+
+            return apiSuccess({ verified: true, sessionToken: session.sessionToken });
         } catch (err) {
             console.log("[ERROR] Failed verifying the authentication\n", err);
             return apiError("Could not verify the authentication request");

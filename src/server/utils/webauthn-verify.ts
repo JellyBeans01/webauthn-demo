@@ -1,15 +1,20 @@
 import { type Authenticator } from "@prisma/client";
 import { verifyAuthenticationResponse, verifyRegistrationResponse } from "@simplewebauthn/server";
-import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/types";
+import { isoUint8Array } from "@simplewebauthn/server/helpers";
+import type {
+    AuthenticationResponseJSON,
+    AuthenticatorTransportFuture,
+    RegistrationResponseJSON,
+} from "@simplewebauthn/types";
 import { rpID, origin } from "~/config/webauthn";
 import { env } from "~/env";
 
 const expectedOrigin = `${origin}${env.NODE_ENV === "development" ? ":3000" : ""}`;
 
-export const verifyRegistration = async (response: RegistrationResponseJSON, challenge: string) => {
+export const verifyRegistration = async (registration: RegistrationResponseJSON, challenge: string) => {
     // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/server/src/authentication/verifyAuthenticationResponse.ts
     return verifyRegistrationResponse({
-        response,
+        response: registration,
         expectedOrigin,
         expectedRPID: rpID,
         expectedChallenge: challenge, // Challenge we stored in the cookies
@@ -18,18 +23,21 @@ export const verifyRegistration = async (response: RegistrationResponseJSON, cha
 };
 
 export const verifyAuthentication = async (
-    response: AuthenticationResponseJSON,
+    authentication: AuthenticationResponseJSON,
     authenticator: Authenticator,
     challenge: string,
 ) => {
     // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/server/src/authentication/verifyAuthenticationResponse.ts
     return verifyAuthenticationResponse({
-        response,
+        response: authentication,
         expectedOrigin,
         expectedRPID: rpID,
         expectedChallenge: challenge, // Challenge we stored in the cookies
         authenticator: {
-            // TODO
+            credentialID: authenticator.credentialID,
+            credentialPublicKey: isoUint8Array.fromHex(authenticator.credentialPublicKey),
+            counter: authenticator.counter,
+            transports: (authenticator.transports?.split(",") ?? []) as AuthenticatorTransportFuture[],
         },
     });
 };
