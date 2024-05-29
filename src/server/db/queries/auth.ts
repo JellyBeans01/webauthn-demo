@@ -3,6 +3,7 @@ import { type User } from "next-auth";
 import { encode } from "next-auth/jwt";
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { type WithRequired } from "~/types";
 
 const generateSessionToken = async (user: User) => {
     const maxAge = 30 * 86400; // 30 days
@@ -13,22 +14,30 @@ const generateSessionToken = async (user: User) => {
     return { token, expires };
 };
 
-export const registerNewUserAndSignIn = async (user: User, authenticator: Omit<Authenticator, "userId">) => {
+export const createSession = async (user: WithRequired<User, "id">) => {
     const { expires, token } = await generateSessionToken(user);
 
-    await db.user.create({
+    return db.session.create({
+        data: {
+            expires,
+            sessionToken: token,
+            user: {
+                connect: {
+                    id: user.id,
+                },
+            },
+        },
+    });
+};
+
+export const registerNewUserAndSignIn = async (user: User, authenticator: Omit<Authenticator, "userId">) => {
+    const newUser = await db.user.create({
         data: {
             name: user.name,
             email: user.email,
             image: user.image,
             authenticator: {
                 create: authenticator,
-            },
-            sessions: {
-                create: {
-                    expires,
-                    sessionToken: token,
-                },
             },
             accounts: {
                 create: {
@@ -40,5 +49,7 @@ export const registerNewUserAndSignIn = async (user: User, authenticator: Omit<A
         },
     });
 
-    return token;
+    const session = await createSession(newUser);
+
+    return session.sessionToken;
 };

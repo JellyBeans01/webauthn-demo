@@ -1,25 +1,27 @@
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import type z from "zod";
 import { env } from "~/env";
-import { type verificationScheme } from "~/server/api/routers/auth-router";
 import { CHALLENGE_COOKIE } from "~/server/resources/constants";
 import { api } from "~/trpc/server";
+import { type VerifyScheme } from "~/types/requests";
 
 export async function POST(req: NextRequest) {
-    const data = (await req.json()) as z.infer<typeof verificationScheme>;
+    const data = (await req.json()) as VerifyScheme;
 
-    const response = await api.auth.verify(data);
+    const { isLogin, response } = data;
+
+    const verifier = isLogin ? api.auth.verifyAuthentication : api.auth.verifyRegistration;
+
+    const verifierResponse = await verifier(response);
 
     // Delete the challenge cookie
     cookies().delete(CHALLENGE_COOKIE);
 
-    if (!response.success) return NextResponse.json(response);
-
-    // Save the session token in the next-auth cookie
-    const { sessionToken, verified } = response.data;
+    // When the request failed: just forward the response to the client, so it can handle it
+    if (!verifierResponse.success) return NextResponse.json(verifierResponse);
 
     // Create the session cookie
+    const { sessionToken, verified } = verifierResponse.data;
     cookies().set(env.NEXTAUTH_SESSION_TOKEN_COOKIE, sessionToken, { secure: true });
 
     // Let's not return the session token to the frontend

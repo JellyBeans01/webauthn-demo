@@ -1,7 +1,8 @@
-import { type PublicKeyCredentialCreationOptionsJSON, type RegistrationResponseJSON } from "@simplewebauthn/types";
+import { type PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
 import { IS_LOGIN_QUERY_PARAM } from "~/resources/constants";
 import { WEBAUTHN_REGISTRATION_OPTIONS, WEBAUTHN_REGISTRATION_VERIFY } from "~/resources/endpoints";
 import { type Response as CustomResponse } from "~/types";
+import { type VerifyScheme } from "~/types/requests";
 
 const handleResponse = async <TData>(response: Response): Promise<CustomResponse<TData>> => {
     if (!response.ok) return { success: false, message: "Something went wrong, try again later..." };
@@ -16,7 +17,7 @@ export const getOptions = async (isLogin: boolean) => {
     return handleResponse<PublicKeyCredentialCreationOptionsJSON>(response);
 };
 
-export const verify = async (body: RegistrationResponseJSON) => {
+export const verify = async (body: VerifyScheme) => {
     const response = await fetch(WEBAUTHN_REGISTRATION_VERIFY, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

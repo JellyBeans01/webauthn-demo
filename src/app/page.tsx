@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { auth } from "~/auth";
 import ManualButton from "~/components/buttons/custom-routes/manual-button";
@@ -14,10 +15,13 @@ export default async function Home() {
             </h1>
             {!!session && (
                 <Link
-                    className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
+                    className="flex flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
                     href="/very-secure-page"
                 >
-                    <div className="text-lg">Navigate to a very secure page :)</div>
+                    <div className="text-lg flex flex-row justify-between items-center gap-4">
+                        <span className="flex-1">Navigate to a very secure page :)</span>
+                        <ArrowRight />
+                    </div>
                 </Link>
             )}
             <Tabs defaultValue="custom-routes">

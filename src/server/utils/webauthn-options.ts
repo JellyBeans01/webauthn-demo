@@ -21,6 +21,7 @@ export const getRegistrationOptions = async (user: Nullable<WithRequired<User, "
         // (Recommended for smoother UX)
         attestationType: "none",
         // Prevent users from re-registering existing authenticators
+        // @ts-expect-error I have to figure out what this should be
         excludeCredentials: passKeys.map<PublicKeyCredentialDescriptorFuture>((passkey) => ({
             id: isoBase64URL.toBuffer(passkey.credentialID),
             type: "public-key",

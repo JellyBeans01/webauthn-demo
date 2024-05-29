@@ -16,36 +16,29 @@ function ManualButton({ children, isLogin = false, ...props }: Props) {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const handleRegistration = useCallback(async (options: PublicKeyCredentialCreationOptionsJSON) => {
-        try {
-            console.log(options);
-            // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/browser/src/methods/startAuthentication.ts
-            return startRegistration(options);
-        } catch (err) {
-            const error = err as { name: string };
+    const handlePasskey = useCallback(
+        async (options: PublicKeyCredentialCreationOptionsJSON) => {
+            try {
+                const action = isLogin
+                    ? startAuthentication // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/browser/src/methods/startAuthentication.ts
+                    : startRegistration; // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/browser/src/methods/startRegistration.ts
 
-            const errorMessage =
-                error.name === "InvalidStateError"
-                    ? "Error: Authenticator was probably already registered by user"
-                    : "Something went wrong, try again later...";
+                return action(options);
+            } catch (err) {
+                const error = err as { name: string };
 
-            toast.error(errorMessage);
+                const errorMessage =
+                    error.name === "InvalidStateError"
+                        ? "Error: Authenticator was probably already registered by user"
+                        : "Something went wrong, try again later...";
 
-            return null;
-        }
-    }, []);
+                toast.error(errorMessage);
 
-    const handleAuthentication = useCallback(async (options: PublicKeyCredentialCreationOptionsJSON) => {
-        try {
-            // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/browser/src/methods/startAuthentication.ts
-            return startAuthentication(options);
-        } catch (err) {
-            console.log(err);
-            toast.error("Something went wrong, try again later...");
-
-            return null;
-        }
-    }, []);
+                return null;
+            }
+        },
+        [isLogin],
+    );
 
     const login = useCallback(async () => {
         try {
@@ -58,15 +51,12 @@ function ManualButton({ children, isLogin = false, ...props }: Props) {
                 return;
             }
 
-            // const authentication = await handleAuthentication(registrationOptionsResponse.data);
-            // if (!authentication) return; // Already handled by the handleAuthentication function
-
             // Pass the options to the authenticator and wait for a response
-            const registration = await handleRegistration(optionsResponse.data);
-            if (!registration) return; // Already handled by the handleRegistration function
+            const passkeyResponse = await handlePasskey(optionsResponse.data);
+            if (!passkeyResponse) return; // Already handled by the handleRegistration function
 
             // Verify registration
-            const verifyResponse = await verify(registration);
+            const verifyResponse = await verify({ response: passkeyResponse, isLogin });
             if (!verifyResponse.success) {
                 toast.error(verifyResponse.message);
                 return;
@@ -79,7 +69,7 @@ function ManualButton({ children, isLogin = false, ...props }: Props) {
         } finally {
             setIsLoading(false);
         }
-    }, [handleRegistration, isLogin, router]);
+    }, [handlePasskey, isLogin, router]);
 
     return (
         <LoadingButton {...props} type="button" isLoading={isLoading} onClick={login}>
