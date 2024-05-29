@@ -10,7 +10,7 @@ export default async function Layout({ children }: PropsWithChildren) {
             <form
                 action={async () => {
                     "use server";
-                    await signOut();
+                    await signOut({ redirectTo: "/" });
                 }}
             >
                 <Button type="submit" variant="destructive" className="mt-5">
