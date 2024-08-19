@@ -74,7 +74,7 @@ function ManualButton({ children, isLogin = false, messageOnSuccess, onSuccess, 
         } finally {
             setIsLoading(false);
         }
-    }, [handlePasskey, isLogin, messageOnSuccess, router]);
+    }, [handlePasskey, isLogin, messageOnSuccess, onSuccess, router]);
 
     return (
         <LoadingButton {...props} type="button" isLoading={isLoading} onClick={login}>
