@@ -4,6 +4,7 @@ import Passkey from "next-auth/providers/passkey";
 import "server-only";
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { type Nullable } from "~/types";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -16,25 +17,27 @@ declare module "next-auth" {
         user: {
             id: string;
             name: string;
-            // role: UserRole;
+            email: Nullable<string>;
+            emailVerified: Nullable<string>;
+            image: Nullable<string>;
+            password: Nullable<string>;
         } & DefaultSession["user"];
     }
-
-    // interface User {
-    //   // ...other properties
-    //   // role: UserRole;
-    // }
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
     callbacks: {
-        session: ({ session, user }) => ({
-            ...session,
-            user: {
-                ...session.user,
-                id: user.id,
-            },
-        }),
+        session: ({ session, user }) => {
+            const { password: _password, ...sessionUser } = session.user;
+
+            return {
+                ...session,
+                user: {
+                    ...sessionUser,
+                    id: user.id,
+                },
+            };
+        },
     },
     adapter: PrismaAdapter(db),
     providers: [Passkey],

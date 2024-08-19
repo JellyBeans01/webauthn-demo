@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { IS_LOGIN_QUERY_PARAM } from "~/resources/constants";
 import { CHALLENGE_COOKIE } from "~/server/resources/constants";
 import { api } from "~/trpc/server";
@@ -16,5 +16,5 @@ export async function GET(req: NextRequest) {
     }
 
     // Forward the response to the frontend
-    return NextResponse.json(response);
+    return Response.json(response);
 }

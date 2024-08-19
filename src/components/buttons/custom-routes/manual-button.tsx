@@ -62,6 +62,8 @@ function ManualButton({ children, isLogin = false, ...props }: Props) {
                 return;
             }
 
+            console.log("router should be refreshing");
+
             router.refresh();
         } catch (err) {
             console.error(err);
