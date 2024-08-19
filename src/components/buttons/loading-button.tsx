@@ -10,9 +10,10 @@ function LoadingButton({ children, isLoading, disabled, ...props }: Props) {
     return (
         <Button disabled={disabled || isLoading} {...props}>
             {isLoading ? (
-                <div className="inline-grid grid-cols-1 justify-center items-center h-full">
-                    <Loader2 className="animate-spin" />
-                </div>
+                <>
+                    <span className="invisible">{children}</span>
+                    <Loader2 className="animate-spin absolute" />
+                </>
             ) : (
                 children
             )}

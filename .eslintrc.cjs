@@ -52,7 +52,6 @@ const config = {
         "react/jsx-curly-brace-presence": ["warn", { props: "never", children: "never" }],
         "react/no-unescaped-entities": "off",
         "react/prop-types": "off",
-        indent: ["error", 4],
     },
 };
 

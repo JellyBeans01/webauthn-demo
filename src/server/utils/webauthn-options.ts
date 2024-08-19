@@ -9,7 +9,9 @@ import { type Nullable, type WithRequired } from "~/types";
 import { generateRandomString } from "~/utils/text";
 
 export const getRegistrationOptions = async (user: Nullable<WithRequired<User, "id">>) => {
-    const passKeys = user ? await getAuthenticatorsByUserId(user.id) : [];
+    const authenticators = user ? await getAuthenticatorsByUserId(user.id) : [];
+
+    console.log(authenticators);
 
     // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/server/src/registration/generateRegistrationOptions.ts
     return generateRegistrationOptions({
@@ -22,9 +24,9 @@ export const getRegistrationOptions = async (user: Nullable<WithRequired<User, "
         attestationType: "none",
         // Prevent users from re-registering existing authenticators
         // @ts-expect-error I have to figure out what this should be
-        excludeCredentials: passKeys.map<PublicKeyCredentialDescriptorFuture>((passkey) => ({
-            id: isoBase64URL.toBuffer(passkey.credentialID),
-            type: "public-key",
+        excludeCredentials: authenticators.map<PublicKeyCredentialDescriptorFuture>((passkey) => ({
+            // @ts-expect-error Typing says it should be of type Buffer, but the code actually requires a Base64URL
+            id: isoBase64URL.fromUTF8String(passkey.credentialID),
             transports: (passkey.transports?.split(",") ?? []) as AuthenticatorTransportFuture[],
         })),
         authenticatorSelection: {

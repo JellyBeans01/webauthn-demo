@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { type ButtonProps } from "~/components/buttons/button";
 import LoadingButton from "~/components/buttons/loading-button";
 
+// https://authjs.dev/getting-started/authentication/webauthn
+
 export type Props = PropsWithChildren<Omit<ButtonProps, "type" | "onClick"> & { isLogin?: boolean }>;
 
 function NextAuthButton({ children, isLogin = false, ...props }: Props) {
@@ -17,7 +19,7 @@ function NextAuthButton({ children, isLogin = false, ...props }: Props) {
             await signIn("passkey", !isLogin ? { action: "register" } : undefined);
         } catch (err) {
             console.log(err);
-            toast.error("something went wrong when trying to login");
+            toast.error("something went wrong when trying to log in");
         } finally {
             setIsLoading(false);
         }
