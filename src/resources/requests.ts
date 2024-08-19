@@ -10,6 +10,8 @@ const handleResponse = async <TData>(response: Response): Promise<CustomResponse
 };
 
 export const getOptions = async (isLogin: boolean) => {
+    if (typeof window === "undefined") throw new Error("getOptions can only be called from the client!");
+
     const url = new URL(WEBAUTHN_REGISTRATION_OPTIONS, window.location.origin);
     url.searchParams.set(IS_LOGIN_QUERY_PARAM, `${isLogin}`);
 

@@ -6,7 +6,7 @@ import { db } from "~/server/db";
 import { type WithRequired } from "~/types";
 
 const generateSessionToken = async (user: User) => {
-    const maxAge = 30 * 86400; // 30 days
+    const maxAge = 30 * 86_400; // 30 days
     const expires = new Date(Date.now() + maxAge * 1_000);
 
     const sessionToken = await encode({
@@ -52,9 +52,7 @@ export const registerNewUserAndSignIn = async (user: User, authenticator: Omit<A
     const newUser = await db.user.create({
         data: {
             name: user.name,
-            email: user.email,
-            image: user.image,
-            // Creates the user account
+            // Creates the user account -> auto links the account to this user
             accounts: {
                 create: {
                     type: "",

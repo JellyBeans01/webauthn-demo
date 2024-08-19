@@ -53,7 +53,7 @@ function ManualButton({ children, isLogin = false, ...props }: Props) {
 
             // Pass the options to the authenticator and wait for a response
             const passkeyResponse = await handlePasskey(optionsResponse.data);
-            if (!passkeyResponse) return; // Already handled by the handleRegistration function
+            if (!passkeyResponse) return; // Already handled by the handlePasskey function
 
             // Verify registration
             const verifyResponse = await verify({ response: passkeyResponse, isLogin });
@@ -61,8 +61,6 @@ function ManualButton({ children, isLogin = false, ...props }: Props) {
                 toast.error(verifyResponse.message);
                 return;
             }
-
-            console.log("router should be refreshing");
 
             router.refresh();
         } catch (err) {
