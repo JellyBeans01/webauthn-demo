@@ -14,15 +14,7 @@ import { CHALLENGE_COOKIE } from "~/server/resources/constants";
 import { apiError, apiSuccess } from "~/server/resources/responses";
 import { getAuthenticationOptions, getRegistrationOptions } from "~/server/utils/webauthn-options";
 import { verifyAuthentication, verifyRegistration } from "~/server/utils/webauthn-verify";
-
-export const verificationScheme = z.object({
-    id: z.string(),
-    type: z.string(),
-    authenticatorAttachment: z.enum(["cross-platform", "platform"]).optional(),
-    rawId: z.string(),
-    response: z.any(),
-    clientExtensionResults: z.any(),
-});
+import { verificationScheme } from "~/types";
 
 export const authRouter = createTRPCRouter({
     generateOptions: publicProcedure.input(z.object({ isLogin: z.boolean() })).query(async ({ ctx, input }) => {

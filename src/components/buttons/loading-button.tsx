@@ -12,7 +12,7 @@ function LoadingButton({ children, isLoading, disabled, ...props }: Props) {
             {isLoading ? (
                 <>
                     <span className="invisible">{children}</span>
-                    <Loader2 className="animate-spin absolute" />
+                    <Loader2 className="absolute animate-spin" />
                 </>
             ) : (
                 children

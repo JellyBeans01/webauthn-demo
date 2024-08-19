@@ -1,5 +1,13 @@
 import z from "zod";
-import { verificationScheme } from "~/server/api/routers/auth-router";
+
+export const verificationScheme = z.object({
+    id: z.string(),
+    type: z.string(),
+    authenticatorAttachment: z.enum(["cross-platform", "platform"]).optional(),
+    rawId: z.string(),
+    response: z.any(),
+    clientExtensionResults: z.any(),
+});
 
 const verifyScheme = z.object({
     isLogin: z.boolean(),
