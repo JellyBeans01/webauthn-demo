@@ -11,8 +11,6 @@ import { generateRandomString } from "~/utils/text";
 export const getRegistrationOptions = async (user: Nullable<WithRequired<User, "id">>) => {
     const authenticators = user ? await getAuthenticatorsByUserId(user.id) : [];
 
-    console.log(authenticators);
-
     // https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/server/src/registration/generateRegistrationOptions.ts
     return generateRegistrationOptions({
         rpName,
@@ -20,7 +18,6 @@ export const getRegistrationOptions = async (user: Nullable<WithRequired<User, "
         userID: isoUint8Array.fromUTF8String(user?.id ?? generateRandomString()),
         userName: user?.name ?? "Anonymous",
         // Don't prompt users for additional information about the authenticator
-        // (Recommended for smoother UX)
         attestationType: "none",
         // Prevent users from re-registering existing authenticators
         // @ts-expect-error I have to figure out what this should be

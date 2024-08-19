@@ -5,6 +5,7 @@ import chalk from "chalk";
 import { type User } from "next-auth";
 import { cookies } from "next/headers";
 import z from "zod";
+import { getWebAuthnProviders } from "~/data/webauthn-providers";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import Logger from "~/server/classes/Logger";
 import { createAuthenticator, createSession, registerNewUserAndSignIn } from "~/server/db/queries/auth";
@@ -56,11 +57,21 @@ export const authRouter = createTRPCRouter({
             if (!verified) return apiError("Registration verification has failed!");
 
             Logger.success("Registration verified!");
-            Logger.info("Registration:\n", JSON.stringify(registrationInfo, null, 2));
+            Logger.info(
+                "Registration:\n",
+                JSON.stringify(
+                    registrationInfo,
+                    (key, value) => (["credentialPublicKey", "attestationObject"].includes(key) ? "..." : value),
+                    2,
+                ),
+            );
 
             if (!registrationInfo?.credentialPublicKey || !registration.response.transports) {
                 return apiError("Verification was successful, but some data was missing!");
             }
+
+            const webAuthnProviders = await getWebAuthnProviders();
+            const webAuthnProvider = webAuthnProviders.get(registrationInfo.aaguid) ?? "Unknown";
 
             // Prepare a new authenticator
             const authenticator: Omit<Authenticator, "userId"> = {
@@ -70,8 +81,7 @@ export const authRouter = createTRPCRouter({
                 transports: registration.response.transports.join(","),
                 credentialBackedUp: registrationInfo.credentialBackedUp,
                 credentialDeviceType: registrationInfo.credentialDeviceType,
-                // TODO: Probable detect which authentication method was used (google, touchID ...)
-                providerAccountId: "WebAuthn",
+                providerAccountId: webAuthnProvider,
             };
 
             // When a user is logged in
