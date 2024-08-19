@@ -1,6 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
 import Passkey from "next-auth/providers/passkey";
+import { redirect } from "next/navigation";
 import "server-only";
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -51,3 +52,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         warn: () => undefined, // Removes annoying logs
     },
 });
+
+export const getSessionAlways = async () => {
+    const session = await auth();
+    if (!session) return redirect("/");
+
+    return session;
+};

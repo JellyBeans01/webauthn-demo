@@ -9,9 +9,11 @@ import { type ButtonProps } from "~/components/buttons/button";
 import LoadingButton from "~/components/buttons/loading-button";
 import { getOptions, verify } from "~/resources/requests";
 
-export type Props = PropsWithChildren<Omit<ButtonProps, "type" | "onClick"> & { isLogin?: boolean }>;
+export type Props = PropsWithChildren<
+    Omit<ButtonProps, "type" | "onClick"> & { isLogin?: boolean; messageOnSuccess?: string; onSuccess?: () => void }
+>;
 
-function ManualButton({ children, isLogin = false, ...props }: Props) {
+function ManualButton({ children, isLogin = false, messageOnSuccess, onSuccess, ...props }: Props) {
     const router = useRouter();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -62,14 +64,17 @@ function ManualButton({ children, isLogin = false, ...props }: Props) {
                 return;
             }
 
-            router.refresh();
+            if (messageOnSuccess) toast.success(messageOnSuccess);
+
+            if (typeof onSuccess === "function") onSuccess();
+            else router.refresh();
         } catch (err) {
             console.error(err);
             toast.error("Something went wrong, try again later...");
         } finally {
             setIsLoading(false);
         }
-    }, [handlePasskey, isLogin, router]);
+    }, [handlePasskey, isLogin, messageOnSuccess, router]);
 
     return (
         <LoadingButton {...props} type="button" isLoading={isLoading} onClick={login}>
