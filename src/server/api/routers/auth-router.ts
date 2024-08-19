@@ -61,7 +61,9 @@ export const authRouter = createTRPCRouter({
                 "Registration:\n",
                 JSON.stringify(
                     registrationInfo,
-                    (key, value) => (["credentialPublicKey", "attestationObject"].includes(key) ? "..." : value),
+                    (key: string, value: unknown) => {
+                        return ["credentialPublicKey", "attestationObject"].includes(key) ? "..." : value;
+                    },
                     2,
                 ),
             );

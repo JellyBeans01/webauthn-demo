@@ -2,6 +2,7 @@
 
 import { type Authenticator } from "@prisma/client";
 import { type ColumnDef } from "@tanstack/react-table";
+import RemoveAuthenticationMethod from "./remove-authentication-method";
 
 export const columns: ColumnDef<Authenticator>[] = [
     {
@@ -20,5 +21,10 @@ export const columns: ColumnDef<Authenticator>[] = [
     {
         accessorKey: "transports",
         header: "Transports",
+    },
+    {
+        id: "actions",
+        header: () => null,
+        cell: ({ row }) => <RemoveAuthenticationMethod credentialId={row.original.credentialID} />,
     },
 ];
